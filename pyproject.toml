@@ -1,0 +1,39 @@
+[project]
+name= "dmode"
+version = "0.1"
+description = "A differential modification site extraction CLI and python package"
+authors = [{ name = "Johannes Miedema, Stefan Pastore, Alexander Haehnel , Nicolo Alagna", email = "stpastor@uni-mainz.de" }]
+dependencies = [
+    "pyarrow",
+    "matplotlib",
+    "scipy",
+    "statsmodels",
+    "tqdm",
+    "anndata",
+    "formulaic",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "formulaic-contrasts",
+    "pydeseq2",
+    "umap-learn",
+    "seaborn",
+    "polars==1.34.0",
+    "pyranges"
+]
+
+
+[build-system]
+requires = ["setuptools>=61.0","wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+dmode = "dmode.cli:main"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+skip-string-normalization = true
+
+[tool.setuptools.packages.find]
+include = ["dmode*"]
