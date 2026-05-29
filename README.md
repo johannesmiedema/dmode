@@ -48,7 +48,10 @@ DModE is designed for both interactive use in Jupyter notebooks (via its Python 
 **Prerequisites:** Python 3.10 or later (developed on 3.12), a C compiler toolchain, and system packages required by `pydeseq2` / `statsmodels`.
 
 ```bash
-# 1. Clone the repository
+# Install via pip:
+pip install dmode
+
+# OR from github: 1. Clone the repository
 git clone https://github.com/stegiopast/dmode.git
 cd dmode
 
