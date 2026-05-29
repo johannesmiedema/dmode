@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/dmode.svg)](https://badge.fury.io/py/dmode)
+
 # DModE – Differential Modification and Expression Analysis
 
 > A Python package and command-line interface for integrated RNA modification and expression analyses from long-read sequencing data.
