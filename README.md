@@ -49,6 +49,20 @@ DModE is designed for both interactive use in Jupyter notebooks (via its Python 
 
 **Prerequisites:** Python 3.10 or later (developed on 3.12), a C compiler toolchain, and system packages required by `pydeseq2` / `statsmodels`.
 
+### From PyPI (recommended)
+
+```bash
+pip install dmode
+```
+
+After installation, the `dmode` command is available in your environment. To upgrade to the latest release:
+
+```bash
+pip install --upgrade dmode
+```
+
+### From source (development)
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/stegiopast/dmode.git
@@ -61,7 +75,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
 
-After installation, the `dmode` command becomes available in your environment. To upgrade, pull the latest changes and re-run `pip install -e .`.
+To upgrade, pull the latest changes and re-run `pip install -e .`.
 
 ---
 
