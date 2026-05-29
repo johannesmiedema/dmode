@@ -1,5 +1,3 @@
-[![PyPI version](https://badge.fury.io/py/dmode.svg)](https://badge.fury.io/py/dmode)
-
 # DModE – Differential Modification and Expression Analysis
 
 > A Python package and command-line interface for integrated RNA modification and expression analyses from long-read sequencing data.
@@ -18,6 +16,8 @@
 ---
 
 ## Introduction
+
+![DModE pipeline overview](dmode.png)
 
 Long-read sequencing technologies (e.g., Oxford Nanopore) can simultaneously capture RNA sequence and base modification information, enabling researchers to study how epitranscriptomic marks such as m⁶A, m⁵C, Ψ (pseudouridine), and 2′-O-methylations change across biological conditions. Analysing this data in a rigorous and reproducible way, however, typically requires navigating multiple tools, file formats, and statistical frameworks.
 
@@ -50,10 +50,7 @@ DModE is designed for both interactive use in Jupyter notebooks (via its Python 
 **Prerequisites:** Python 3.10 or later (developed on 3.12), a C compiler toolchain, and system packages required by `pydeseq2` / `statsmodels`.
 
 ```bash
-# Install via pip:
-pip install dmode
-
-# OR from github: 1. Clone the repository
+# 1. Clone the repository
 git clone https://github.com/stegiopast/dmode.git
 cd dmode
 
