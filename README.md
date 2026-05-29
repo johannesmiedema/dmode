@@ -47,8 +47,6 @@ DModE is designed for both interactive use in Jupyter notebooks (via its Python 
 
 ## Installation
 
-**Prerequisites:** Python 3.10 or later (developed on 3.12), a C compiler toolchain, and system packages required by `pydeseq2` / `statsmodels`.
-
 ### From PyPI (recommended)
 
 ```bash
