@@ -109,6 +109,8 @@ One or more control/baseline condition labels must be designated as reference le
 
 ## CLI Tutorial
 
+> 📖 **A rendered, step-by-step HTML tutorial is also available online:** https://johannesmiedema.github.io/dmode/
+
 This tutorial walks through the most common DModE workflows using the example HEK293 vs. UHRR dataset. Each command can be run with a metadata file (`--metadata`) **or** with explicit file lists (`--data-files`, `--conditions`, `--samplenames`); both styles are shown where instructive.
 
 ### 1. Exploratory statistics at the gene level
