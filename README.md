@@ -40,7 +40,7 @@ DModE is designed for both interactive use in Jupyter notebooks (via its Python 
 - Integrated expression + modification workflows (gene or transcript level) with scatter/correlation plots linking both data modalities.
 - Flexible input: provide a tab-separated metadata sheet **or** explicit file lists on the command line — both modes are supported for every command.
 - Filter to specific modification types (e.g. `--modification m6A Cm`) or analyse all types detected in the data automatically.
-- Automatic `dmode_report.html` generation grouping all outputs by analysis, modification type, and condition comparison.
+- Automatic `dmode_report.html` generation grouping all visualizations by analysis, modification type, and condition comparison.
 - Python API (`DmodE` class) for notebooks and custom scripted analyses.
 
 ---
