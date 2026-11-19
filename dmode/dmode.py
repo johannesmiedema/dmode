@@ -3,7 +3,8 @@ import logging
 import pandas as pd
 from tqdm import tqdm
 from dmode.differential_expression_analysis import (merge_single_sample_feature_count_tables,
-                                                    merge_single_sample_salmon_count_tables)
+                                                    merge_single_sample_salmon_count_tables,
+                                                    merge_single_sample_oarfish_count_tables)
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +145,9 @@ class DmodE:
         bed_desc = "Preprocessing gene modification BED files"
         for fp in tqdm(data_files_attr, desc=bed_desc, unit="file"):
             logger.info(f"Preprocessing BED file: {fp}")
-            df = pd.read_csv(fp, delimiter="\t", header=None)
+            # column 4 (modified base code) as str: ChEBI codes like 17802 would otherwise be
+            # read as int when a file has no letter codes, and never match the str codes
+            df = pd.read_csv(fp, delimiter="\t", header=None, dtype={3: str})
             df.columns = [
                 "chrom",
                 "start position",
@@ -289,7 +292,9 @@ class DmodE:
         bed_desc = "Preprocessing transcript modification BED files"
         for fp in tqdm(data_files_attr, desc=bed_desc, unit="file"):
             logger.info(f"Preprocessing BED file: {fp}")
-            df = pd.read_csv(fp, delimiter="\t", header=None)
+            # column 4 (modified base code) as str: ChEBI codes like 17802 would otherwise be
+            # read as int when a file has no letter codes, and never match the str codes
+            df = pd.read_csv(fp, delimiter="\t", header=None, dtype={3: str})
             df.columns = [
                 "chrom",
                 "start position",
@@ -420,7 +425,7 @@ class DmodE:
         # data_list = os.listdir(self.data_folder
 
         # Read all files
-        self.diff_transcript_exp_count_df, self.diff_transcript_exp_conditions_df = merge_single_sample_salmon_count_tables(input_files = self.diff_transcript_exp_data_files,
+        self.diff_transcript_exp_count_df, self.diff_transcript_exp_conditions_df = merge_single_sample_oarfish_count_tables(input_files = self.diff_transcript_exp_data_files,
                                                                                                                             conditions = self.diff_transcript_exp_conditions, 
                                                                                                                             samplenames = self.diff_transcript_exp_samplenames, 
                                                                                                                             output_folder=output_folder) 

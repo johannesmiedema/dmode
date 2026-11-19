@@ -31,6 +31,7 @@ from dmode import (
     gtf_to_df,
     merge_single_sample_feature_count_tables,
     merge_single_sample_salmon_count_tables,
+    merge_single_sample_oarfish_count_tables,
     prepare_deseq_dataset,
     diff_exp_analysis,
     diff_exp_volcano_plot,
@@ -1348,13 +1349,25 @@ def gene_basic_statistics(args):
         except Exception as e:
             logger.warning(f"Could not generate UMAP plot for modification {mod} due to error: {e}")
         logger.info(f"Barplot modification sites for {mod}")
-        generate_modsite_barplot(processed_dataframes=DmodE_object.basic_gene_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="gene")
+        try:
+            generate_modsite_barplot(processed_dataframes=DmodE_object.basic_gene_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="gene")
+        except Exception as e:
+            logger.warning(f"Could not generate generate_modsite_barplot for modification {mod} due to error: {e}")
         logger.info(f"Plot modification probablity distribution for {mod}")
-        generate_modification_distribution_plot(processed_dataframes=DmodE_object.basic_gene_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="gene")
+        try:
+            generate_modification_distribution_plot(processed_dataframes=DmodE_object.basic_gene_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="gene")
+        except Exception as e:
+            logger.warning(f"Could not generate generate_modification_distribution_plot for modification {mod} due to error: {e}")
         logger.info(f"Violin plot modification probability distribution {mod}")
-        generate_modification_violin_plot(processed_dataframes=DmodE_object.basic_gene_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="gene")
+        try:
+            generate_modification_violin_plot(processed_dataframes=DmodE_object.basic_gene_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="gene")
+        except Exception as e:
+            logger.warning(f"Could not generate generate_modification_violin_plot for modification {mod} due to error: {e}")
         logger.info(f"Sample to sample plot of modification sites for {mod}")
-        generate_sample_to_sample_correlation_plot(processed_dataframes=DmodE_object.basic_gene_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="gene")
+        try:
+            generate_sample_to_sample_correlation_plot(processed_dataframes=DmodE_object.basic_gene_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="gene")
+        except Exception as e:
+            logger.warning(f"Could not generate generate_sample_to_sample_correlation_plot for modification {mod} due to error: {e}")
         
         if args.rmbase_database_file != "":
             logger.info(f"Generate intersection plots of modification sites with RMBase data for {mod}")
@@ -1513,18 +1526,36 @@ def transcript_basic_statistics(args):
     for possible_mod_code in possible_modifications:
         mod = moddict_mapping_reverse(possible_mod_code)
         if at_least_4_total:
-            logger.info(f"PCA for {mod}")
-            generate_PCA_Plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder,annotate_samples=False, operational_level="transcript")
-            logger.info(f"UMAP for {mod}")
-            generate_UMAP_plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder,annotate_samples=False, operational_level="transcript")
+            try:
+                logger.info(f"PCA for {mod}")
+                generate_PCA_Plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder,annotate_samples=False, operational_level="transcript")
+            except Exception as e:
+                logger.warning(f"Could not generate PCA plot for modification {mod} due to error: {e}")
+            try:
+                logger.info(f"UMAP for {mod}")
+                generate_UMAP_plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder,annotate_samples=False, operational_level="transcript")
+            except Exception as e:
+                logger.warning(f"Could not generate UMAP plot for modification {mod} due to error: {e}")
         logger.info(f"Barplot modification sites for {mod}")
-        generate_modsite_barplot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="transcript")
+        try:
+            generate_modsite_barplot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="transcript")
+        except Exception as e:
+            logger.warning(f"Could not generate generate_modsite_barplot for modification {mod} due to error: {e}")
         logger.info(f"Plot modification probablity distribution for {mod}")
-        generate_modification_distribution_plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="transcript")
+        try:
+            generate_modification_distribution_plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="transcript")
+        except Exception as e:
+            logger.warning(f"Could not generate generate_modification_distribution_plot for modification {mod} due to error: {e}")
         logger.info(f"Violin plot modification probability distribution for {mod}")
-        generate_modification_violin_plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="transcript")
+        try:
+            generate_modification_violin_plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="transcript")
+        except Exception as e:
+            logger.warning(f"Could not generate generate_modification_violin_plot for modification {mod} due to error: {e}")
         logger.info(f"Sample to sample plot of modification sites for {mod}")
-        generate_sample_to_sample_correlation_plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="transcript")
+        try:
+            generate_sample_to_sample_correlation_plot(processed_dataframes=DmodE_object.basic_transcript_mod_dataframe_condition_dict,modification=possible_mod_code, output_folder=args.output_folder, operational_level="transcript")
+        except Exception as e:
+            logger.warning(f"Could not generate generate_sample_to_sample_correlation_plot for modification {mod} due to error: {e}")
     
     # Generate HTML report
     _generate_report_if_possible(args.output_folder)

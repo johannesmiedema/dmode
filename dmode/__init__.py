@@ -31,6 +31,7 @@ from dmode.differential_modification_analysis import (diff_gene_mod_cond_extract
 
 from dmode.differential_expression_analysis import (merge_single_sample_feature_count_tables,
                                                     merge_single_sample_salmon_count_tables,
+                                                    merge_single_sample_oarfish_count_tables,
                                                     prepare_deseq_dataset,
                                                     diff_exp_analysis,
                                                     diff_exp_volcano_plot,

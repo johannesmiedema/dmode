@@ -60,6 +60,34 @@ def merge_single_sample_feature_count_tables(input_files: list, conditions: list
         df.to_csv(output_file, sep="\t", index=False)
     return df,condition_dict
 
+
+def merge_single_sample_oarfish_count_tables(input_files: list, conditions: list, samplenames:list, output_folder: str="")->pd.DataFrame | dict:
+    """
+    Merge multiple Oarfish quantification files into a single count matrix.
+
+    Reads oarfish's native ``.quant`` output (columns ``tname``, ``len``, ``num_reads``).
+    Transcript IDs are taken before the first '|' (GENCODE headers), as for Salmon.
+    All files must come from the same oarfish index (identical row order).
+    """
+    df_temp = pd.read_csv(input_files[0], sep = "\t", header = 0)
+
+    df_temp["Name"] = [i.split(sep = "|")[0] for i in df_temp["tname"]]
+    df_construct = pd.DataFrame([[0 for i in range(len(samplenames))] for k in range(df_temp.shape[0])],columns=samplenames)
+    df = pd.concat([df_temp["Name"],df_construct], axis = 1)
+    df.columns = ["Name"] + samplenames
+    condition_dict = dict(zip(samplenames, conditions))
+    first_tnames = df_temp["tname"]
+    for input_file, samplename in zip(input_files, samplenames):
+        df_temp = pd.read_csv(input_file, sep = "\t", header = 0)
+        if not df_temp["tname"].equals(first_tnames):
+            raise ValueError(f"{input_file} lists other transcripts (or another order) than {input_files[0]}; all oarfish files must come from the same index")
+        df[samplename] = df_temp["num_reads"]
+    if output_folder != "":
+        output_file = os.path.join(output_folder,"merged_oarfish_counts.tsv")
+        df.to_csv(output_file, sep="\t", index=False)
+    return df,condition_dict
+
+
 def merge_single_sample_salmon_count_tables(input_files: list, conditions: list, samplenames:list, output_folder: str="")->pd.DataFrame | dict:
     """
     Merge multiple Salmon quantification files into a single count matrix.
@@ -139,8 +167,9 @@ def prepare_deseq_dataset(counts_df: pd.DataFrame, condition_dict: dict) -> Dese
     - Model refitting
     """
     counts_df_iteration = pd.DataFrame(counts_df.set_index("Name", inplace=False))
-    #Transform every number to integer
-    counts_df_iteration = counts_df_iteration.astype(int)
+    # DESeq2 needs integers. Round (not truncate): oarfish/salmon write fractional EM
+    # estimates such as 0.9999999999999999, which astype(int) alone would turn into 0
+    counts_df_iteration = counts_df_iteration.round().astype(int)
     metadata_df = pd.DataFrame.from_dict(condition_dict, orient="index", columns=["condition"])
     deseq_dataset = DeseqDataSet(
         counts=counts_df_iteration.T,
@@ -211,13 +240,9 @@ def diff_exp_analysis(counts_df: pd.DataFrame, condition_dict: dict, output_fold
     cooks_filter=True,
     independent_filter=True,
     )
-    deseq_stats.run_wald_test()
-    #deseq_stats.p_values
-    # if deseq_stats.independent_filter:
-    #     deseq_stats._independent_filtering()
-    # else:
-    deseq_stats._p_value_adjustment()
-        #deseq_stats.padj
+    # summary() runs the Wald test, Cook's filtering and independent filtering + BH in
+    # the DESeq2 order. Do not call _p_value_adjustment() beforehand: summary() would then
+    # see an existing padj and skip independent filtering (fewer discoveries than DESeq2).
     deseq_stats.summary()
     result_df = deseq_stats.results_df
     if output_folder != "":

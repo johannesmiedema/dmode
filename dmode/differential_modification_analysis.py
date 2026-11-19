@@ -342,8 +342,9 @@ def fisher_exact_test(
         # "oddsratio":oddsratio,
         "pvalue": p_value,
         "id": id,
-        f"mod_freq_{ref_level}": (table[1, 0] / table[1, :].sum()) * 100,
-        f"mod_freq_{cond_level}": (table[0, 0] / table[0, :].sum()) * 100,
+        # row 0 = reference, row 1 = condition (see table construction in the callers)
+        f"mod_freq_{ref_level}": (table[0, 0] / table[0, :].sum()) * 100,
+        f"mod_freq_{cond_level}": (table[1, 0] / table[1, :].sum()) * 100,
     }
 
 
@@ -756,10 +757,12 @@ def diff_gene_mod_cond_extraction(dmode_obj, correction_method="SLIM", output_fo
         output_df = pd.concat([output_df, pd.DataFrame(results_list)], axis=0)
         valid_mask = output_df["pvalue"] < 1.0
         output_df["padj"] = np.nan
-        if correction_method == "SLIM":
+        # case-insensitive: the CLI documents "SLIM" and "bh", the pipeline passes "BH"
+        if str(correction_method).upper() == "SLIM":
             output_df.loc[valid_mask, "padj"] = SLIMfunc(dmode_obj=dmode_obj,raw_pvalues=output_df.loc[valid_mask,"pvalue"],output_folder=output_folder)
-        if correction_method == "bh":
+        elif str(correction_method).lower() == "bh":
             output_df.loc[valid_mask, "padj"] = benjamini_hochberg(dmode_obj=dmode_obj,pvals=output_df.loc[valid_mask,"pvalue"])
+        output_df.loc[output_df["padj"] == 0, "padj"] = 2.2250738585072014e-308
         output_df["neg_log_p"] = -np.log10(output_df["padj"])
         comparison = f"{cond_level}_VS_{ref_level}"
         comparisons_dict[comparison] = pd.DataFrame(output_df)
@@ -1516,10 +1519,12 @@ def diff_transcript_mod_cond_extraction(dmode_obj, correction_method="SLIM", out
         output_df = pd.concat([output_df, pd.DataFrame(results_list)], axis=0)
         valid_mask = output_df["pvalue"] < 1.0
         output_df["padj"] = np.nan
-        if correction_method == "SLIM":
+        # case-insensitive: the CLI documents "SLIM" and "bh", the pipeline passes "BH"
+        if str(correction_method).upper() == "SLIM":
             output_df.loc[valid_mask, "padj"] = SLIMfunc(dmode_obj=dmode_obj,raw_pvalues=output_df.loc[valid_mask,"pvalue"],output_folder=output_folder)
-        if correction_method == "bh":
+        elif str(correction_method).lower() == "bh":
             output_df.loc[valid_mask, "padj"] = benjamini_hochberg(dmode_obj=dmode_obj,pvals=output_df.loc[valid_mask,"pvalue"])
+        output_df.loc[output_df["padj"] == 0, "padj"] = 2.2250738585072014e-308
         output_df["neg_log_p"] = -np.log10(output_df["padj"])
         comparisons_dict[f"{cond_level}_VS_{ref_level}"] = pd.DataFrame(output_df)
         outer_join_comparisons_dict[f"{cond_level}_VS_{ref_level}"] = outer_join_df

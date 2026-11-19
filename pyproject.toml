@@ -17,6 +17,7 @@ dependencies = [
     "formulaic-contrasts",
     "pydeseq2",
     "umap-learn",
+    "adjustText",
     "seaborn",
     "polars==1.34.0",
     "pyranges"
