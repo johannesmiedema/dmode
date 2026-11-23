@@ -308,8 +308,10 @@ def diff_exp_volcano_plot(result_df: pd.DataFrame, output_folder: str = "", pval
     color_increase = '#D73027'  # Red for increase
     color_ns = '#BDBDBD'  # Gray for not significant
     
-    # Calculate -log10(padj)
-    result_df['neg_log_padj'] = -np.log10(result_df['padj'])
+    # Calculate -log10(padj). padj can underflow to exactly 0 for very strong effects;
+    # -log10(0) = inf would drop those genes (and their labels) from the plot, so clip to
+    # the smallest positive float for plotting only (padj in the result tables stays 0)
+    result_df['neg_log_padj'] = -np.log10(result_df['padj'].clip(lower=np.finfo(float).tiny))
     
     # Create masks
     upregulated = (result_df["padj"] < pvalue_threshold) & (result_df["log2FoldChange"] > lfc_threshold)
