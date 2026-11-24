@@ -8,6 +8,7 @@ import os
 import warnings
 from scipy.stats import linregress
 from adjustText import adjust_text
+from dmode.differential_modification_analysis import DEFAULT_MIN_FREQ_DIFF
 
 logger = logging.getLogger(__name__)
   
@@ -15,7 +16,10 @@ def gene_expression_vs_modification_differcence_scatterplot(
         data_dict: dict,
         output_dir: str = "",
         log2fc_threshold: float = 0,
-        operational_level: str = 'genome'
+        operational_level: str = 'genome',
+        min_freq_diff: float = DEFAULT_MIN_FREQ_DIFF,
+        alpha_modification: float = 0.05,
+        alpha_expression: float = 0.05,
 ) -> dict:
     """
     Plots a scatterplot comparing gene expression and modification differences.
@@ -106,9 +110,11 @@ def gene_expression_vs_modification_differcence_scatterplot(
         )
 
         # Significance flags
-        merged_df['all significance'] = (merged_df['padj_mod'] < 0.05) & (merged_df['padj_exp'] < 0.05)
-        merged_df['mod significance'] = (merged_df['padj_mod'] < 0.05)
-        merged_df['exp significance'] = (merged_df['padj_exp'] < 0.05)
+        mod_sig = (merged_df['padj_mod'] < alpha_modification) & (merged_df['mod_freq_diff'].abs() >= min_freq_diff)
+        exp_sig = merged_df['padj_exp'] < alpha_expression
+        merged_df['all significance'] = mod_sig & exp_sig
+        merged_df['mod significance'] = mod_sig
+        merged_df['exp significance'] = exp_sig
 
         # Significance subsets
         sub_nonsig  = merged_df[~merged_df['mod significance'] & ~merged_df['exp significance']]
@@ -242,11 +248,15 @@ def expression_modification_correlation_scatterplot(
         data_dict: dict,
         output_dir: str = "",
         log2fc_threshold: float = 0,
-        operational_level: str = 'genome'
+        operational_level: str = 'genome',
+        min_freq_diff: float = DEFAULT_MIN_FREQ_DIFF,
+        alpha_modification: float = 0.05,
+        alpha_expression: float = 0.05,
 ) -> dict:
     """
     Plots a scatterplot comparing expression and modification differences per quadrant,
-    only for significant genes/transcripts and modifications (padj < 0.05).
+    only for significant genes/transcripts (padj < alpha_expression) and modifications
+    (padj < alpha_modification and |mod_freq_diff| >= min_freq_diff).
     
     Quadrants:
     1. Mod Down, Expression Up (negative correlation)
@@ -264,6 +274,13 @@ def expression_modification_correlation_scatterplot(
         Log2 fold change threshold (default: 0)
     operational_level : str
         Either 'genome' for gene-level or 'transcriptome' for transcript-level analysis
+    min_freq_diff : float, default 10
+        Minimum absolute modification frequency difference (percentage points) for a
+        modification site to count as significant.
+    alpha_modification : float, default 0.05
+        Adjusted p-value threshold for modification sites (the CLI passes -a).
+    alpha_expression : float, default 0.05
+        Adjusted p-value threshold for differential expression (the CLI passes -A).
 
     Returns
     -------
@@ -343,8 +360,9 @@ def expression_modification_correlation_scatterplot(
             suffixes=('_mod', '_exp')
         )
 
-        # Add significance column: True if both padj_mod and padj_exp < 0.05
-        merged_df['all significance'] = (merged_df['padj_mod'] < 0.05) & (merged_df['padj_exp'] < 0.05)
+        # Add significance column: True if padj_mod < alpha_modification with a modification
+        # difference of at least min_freq_diff percentage points, and padj_exp < alpha_expression
+        merged_df['all significance'] = (merged_df['padj_mod'] < alpha_modification) & (merged_df['mod_freq_diff'].abs() >= min_freq_diff) & (merged_df['padj_exp'] < alpha_expression)
 
         # Only keep rows where both expression and modification are significant
         sig_df = merged_df[merged_df['all significance']].copy()
@@ -496,7 +514,10 @@ def expression_modification_correlation_scatterplot(
 def plot_top50_genes_with_most_number_of_significant_modifications(
     data_dict: dict,
     output_dir: str = "",
-    operational_level: str = 'genome'
+    operational_level: str = 'genome',
+    min_freq_diff: float = DEFAULT_MIN_FREQ_DIFF,
+    alpha_modification: float = 0.05,
+    alpha_expression: float = 0.05,
 ) -> dict:
     """
     Plots the top genes/transcripts with the most number of significant modifications.
@@ -510,6 +531,13 @@ def plot_top50_genes_with_most_number_of_significant_modifications(
         Directory to save output plots
     operational_level : str
         Either 'genome' for gene-level or 'transcriptome' for transcript-level analysis
+    min_freq_diff : float, default 10
+        Minimum absolute modification frequency difference (percentage points) for a
+        modification site to count as significant.
+    alpha_modification : float, default 0.05
+        Adjusted p-value threshold for modification sites (the CLI passes -a).
+    alpha_expression : float, default 0.05
+        Adjusted p-value threshold for differential expression (the CLI passes -A).
 
     Returns
     -------
@@ -590,8 +618,9 @@ def plot_top50_genes_with_most_number_of_significant_modifications(
             suffixes=('_mod', '_exp')
         )
         
-        # Add significance column: True if both padj_mod and padj_exp < 0.05
-        merged_df['all significance'] = (merged_df['padj_mod'] < 0.05) & (merged_df['padj_exp'] < 0.05) 
+        # Add significance column: True if padj_mod < alpha_modification with a modification
+        # difference of at least min_freq_diff percentage points, and padj_exp < alpha_expression
+        merged_df['all significance'] = (merged_df['padj_mod'] < alpha_modification) & (merged_df['mod_freq_diff'].abs() >= min_freq_diff) & (merged_df['padj_exp'] < alpha_expression)
         
         # Only keep rows where both expression and modification are significant
         sig_df = merged_df[merged_df['all significance']].copy()

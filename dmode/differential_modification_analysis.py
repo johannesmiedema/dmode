@@ -18,6 +18,17 @@ from typing import Optional
 
 
 
+
+# Minimum absolute modification frequency difference (percentage points) for a site to count
+# as differentially modified, in addition to padj < alpha. Used for the significant-site
+# tables, the volcano plots and the expression x modification analyses alike.
+DEFAULT_MIN_FREQ_DIFF = 10.0
+
+
+def is_significant_site(df: pd.DataFrame, alpha: float, min_freq_diff: float = DEFAULT_MIN_FREQ_DIFF) -> pd.Series:
+    """Boolean mask of differentially modified sites: padj < alpha and |mod_freq_diff| >= min_freq_diff."""
+    return (df["padj"] < alpha) & (df["mod_freq_diff"].abs() >= min_freq_diff)
+
 def _append_positions_column(df: pd.DataFrame, chrom_column: str = "chrom") -> pd.DataFrame:
     """Ensure a positions column exists for annotation joins."""
     if df is None or df.empty:
@@ -779,7 +790,8 @@ def diff_gene_mod_cond_extraction(dmode_obj, correction_method="SLIM", output_fo
 
 
 def diff_gene_mod_cond_extract_significant_positions(
-    dmode_obj, ref_level:str, cond_level:str, alpha:float = 0.05, chr:str="", output_folder:str=""
+    dmode_obj, ref_level:str, cond_level:str, alpha:float = 0.05, chr:str="", output_folder:str="",
+    min_freq_diff:float = DEFAULT_MIN_FREQ_DIFF,
 ):
     """
     Extract genomic positions with significant differential modification.
@@ -799,6 +811,8 @@ def diff_gene_mod_cond_extract_significant_positions(
         Specific chromosome to filter for. If empty, all chromosomes included.
     output_folder : str, default ""
         Directory path to save results. If empty, no files are written.
+    min_freq_diff : float, default 10
+        Minimum absolute modification frequency difference (percentage points).
         
     Returns
     -------
@@ -812,14 +826,14 @@ def diff_gene_mod_cond_extract_significant_positions(
         
     Notes
     -----
-    - Positions are filtered based on padj < alpha
+    - Positions are filtered based on padj < alpha and |mod_freq_diff| >= min_freq_diff
     - Results can be optionally filtered by chromosome
     - Output is saved as tab-separated file if output_folder is specified
     - This creates a BED-like format suitable for genomic analysis tools
     """
     if chr == "":
         filtered_df = dmode_obj.diff_gene_mod_comparisons_dict[f"{cond_level}_VS_{ref_level}"]
-        filtered_df = filtered_df[(filtered_df["padj"] < alpha)]
+        filtered_df = filtered_df[is_significant_site(filtered_df, alpha, min_freq_diff)]
         # Create BED DataFrame
         bed_df = pd.DataFrame(
             filtered_df, columns=["chrom", "start", "end", "strand", "mod_type"]
@@ -833,7 +847,7 @@ def diff_gene_mod_cond_extract_significant_positions(
     else:
         filtered_df = dmode_obj.diff_gene_mod_comparisons_dict[f"{cond_level}_VS_{ref_level}"]
         filtered_df = filtered_df[
-            (filtered_df["padj"] < alpha) & (filtered_df["chrom"] == chr)
+            is_significant_site(filtered_df, alpha, min_freq_diff) & (filtered_df["chrom"] == chr)
         ]
         # Create BED DataFrame
         bed_df = pd.DataFrame(
@@ -936,6 +950,7 @@ def diff_gene_mod_cond_generate_volcano_plots(
     alpha: float,
     modtype: str = None,
     annotation_df: Optional[pd.DataFrame] = None,
+    min_freq_diff: float = DEFAULT_MIN_FREQ_DIFF,
 ):
     """
     Generate multi-panel volcano plots showing differential modification across chromosomes.
@@ -957,6 +972,9 @@ def diff_gene_mod_cond_generate_volcano_plots(
         - 'positions': genomic position identifiers
     alpha : float
         Significance threshold for adjusted p-values (e.g., 0.05).
+    min_freq_diff : float, default 10
+        Minimum absolute modification frequency difference (percentage points) for a
+        site to count as significant; drawn as the vertical threshold lines.
     annotation_df : pandas.DataFrame, optional
         Optional annotation table containing a `positions` column along with
         identifier columns (e.g., `gene_name`, `gene_id`) used to enrich labels.
@@ -970,11 +988,11 @@ def diff_gene_mod_cond_generate_volcano_plots(
     -----
     - Creates a 4-column grid with as many rows as needed
     - Color coding:
-        - Gray (#BDBDBD): not significant or effect size < 4%
+        - Gray (#BDBDBD): not significant or |difference| < min_freq_diff
         - Blue (#4575B4): significant decrease
         - Red (#D73027): significant increase
     - Horizontal line at -log10(alpha) for significance threshold
-    - Vertical lines at ±4% modification difference
+    - Vertical lines at ±min_freq_diff modification difference
     - X-axis range: -100% to +100%
     - Scientific styling with minimal decorations
     - Top hits annotated with gene identifiers (chr:start:strand) when available
@@ -1019,8 +1037,9 @@ def diff_gene_mod_cond_generate_volcano_plots(
         final_analysis_df = working_df[working_df["chrom"] == Chr_names[i]]
 
         # Create masks
-        blue_mask = (final_analysis_df['mod_freq_diff'] <= -4) & (final_analysis_df['padj'] < alpha)
-        red_mask = (final_analysis_df['mod_freq_diff'] >= 4) & (final_analysis_df['padj'] < alpha)
+        significant = is_significant_site(final_analysis_df, alpha, min_freq_diff)
+        blue_mask = significant & (final_analysis_df['mod_freq_diff'] < 0)
+        red_mask = significant & (final_analysis_df['mod_freq_diff'] > 0)
         gray_mask = ~(blue_mask | red_mask)
 
         # Plot gray points (not significant)
@@ -1072,8 +1091,8 @@ def diff_gene_mod_cond_generate_volcano_plots(
         
         # Threshold lines
         ax.axhline(y=-np.log10(alpha), color='black', linestyle='--', linewidth=0.8, alpha=0.5)
-        ax.axvline(x=4, color='black', linestyle='--', linewidth=0.8, alpha=0.5)
-        ax.axvline(x=-4, color='black', linestyle='--', linewidth=0.8, alpha=0.5)
+        ax.axvline(x=min_freq_diff, color='black', linestyle='--', linewidth=0.8, alpha=0.5)
+        ax.axvline(x=-min_freq_diff, color='black', linestyle='--', linewidth=0.8, alpha=0.5)
         
         ax.set_xlim(-100, 100)
         ax.set_facecolor('white')
@@ -1102,6 +1121,7 @@ def diff_gene_mod_cond_generate_volcano_plot_single_chr(
     alpha: float,
     modtype: str = None,
     annotation_df: Optional[pd.DataFrame] = None,
+    min_freq_diff: float = DEFAULT_MIN_FREQ_DIFF,
 ):
     """
     Generate a single volcano plot for one chromosome or all chromosomes combined.
@@ -1122,6 +1142,9 @@ def diff_gene_mod_cond_generate_volcano_plot_single_chr(
         - 'positions': genomic position identifiers
     alpha : float
         Significance threshold for adjusted p-values (e.g., 0.05).
+    min_freq_diff : float, default 10
+        Minimum absolute modification frequency difference (percentage points) for a
+        site to count as significant; drawn as the vertical threshold lines.
     annotation_df : pandas.DataFrame, optional
         Optional annotation table with `positions` and identifier columns used to
         enrich point labels.
@@ -1135,12 +1158,12 @@ def diff_gene_mod_cond_generate_volcano_plot_single_chr(
     -----
     - Creates a single figure with scientific styling
     - Color coding:
-        - Gray (#BDBDBD): not significant or effect size < 4%
+        - Gray (#BDBDBD): not significant or |difference| < min_freq_diff
         - Blue (#4575B4): significant decrease
         - Red (#D73027): significant increase
     - Reference lines:
         - Horizontal at -log10(alpha) for significance threshold
-        - Vertical at ±4% modification difference
+        - Vertical at ±min_freq_diff modification difference
     - X-axis range: -100% to +100%
     - Clean, publication-quality appearance
     - Top 10 most significant positions are annotated with gene identifiers (chr:start:strand) when available
@@ -1190,8 +1213,9 @@ def diff_gene_mod_cond_generate_volcano_plot_single_chr(
         return fallback_label
     
     # Create masks
-    blue_mask = (final_analysis_df['mod_freq_diff'] <= -4) & (final_analysis_df['padj'] < alpha)
-    red_mask = (final_analysis_df['mod_freq_diff'] >= 4) & (final_analysis_df['padj'] < alpha)
+    significant = is_significant_site(final_analysis_df, alpha, min_freq_diff)
+    blue_mask = significant & (final_analysis_df['mod_freq_diff'] < 0)
+    red_mask = significant & (final_analysis_df['mod_freq_diff'] > 0)
     gray_mask = ~(blue_mask | red_mask)
 
     # Define colors matching scientific palette
@@ -1244,8 +1268,8 @@ def diff_gene_mod_cond_generate_volcano_plot_single_chr(
 
     # Threshold lines
     ax.axhline(y=-np.log10(alpha), color='black', linestyle='--', linewidth=1.0, alpha=0.5)
-    ax.axvline(x=4, color='black', linestyle='--', linewidth=1.0, alpha=0.5)
-    ax.axvline(x=-4, color='black', linestyle='--', linewidth=1.0, alpha=0.5)
+    ax.axvline(x=min_freq_diff, color='black', linestyle='--', linewidth=1.0, alpha=0.5)
+    ax.axvline(x=-min_freq_diff, color='black', linestyle='--', linewidth=1.0, alpha=0.5)
     
     ax.set_xlim(-100, 100)
     ax.set_facecolor('white')
@@ -1540,7 +1564,8 @@ def diff_transcript_mod_cond_extraction(dmode_obj, correction_method="SLIM", out
 
 
 def diff_transcript_mod_cond_extract_significant_positions(
-    dmode_obj, ref_level:str, cond_level:str, alpha:float = 0.05, chr:str="", output_folder:str=""
+    dmode_obj, ref_level:str, cond_level:str, alpha:float = 0.05, chr:str="", output_folder:str="",
+    min_freq_diff:float = DEFAULT_MIN_FREQ_DIFF,
 ):
     """
     Extract genomic positions with significant differential modification.
@@ -1560,6 +1585,8 @@ def diff_transcript_mod_cond_extract_significant_positions(
         Specific chromosome to filter for. If empty, all chromosomes included.
     output_folder : str, default ""
         Directory path to save results. If empty, no files are written.
+    min_freq_diff : float, default 10
+        Minimum absolute modification frequency difference (percentage points).
         
     Returns
     -------
@@ -1573,14 +1600,14 @@ def diff_transcript_mod_cond_extract_significant_positions(
         
     Notes
     -----
-    - Positions are filtered based on padj < alpha
+    - Positions are filtered based on padj < alpha and |mod_freq_diff| >= min_freq_diff
     - Results can be optionally filtered by chromosome
     - Output is saved as tab-separated file if output_folder is specified
     - This creates a BED-like format suitable for genomic analysis tools
     """
     if chr == "":
         filtered_df = dmode_obj.diff_transcript_mod_comparisons_dict[f"{cond_level}_VS_{ref_level}"]
-        filtered_df = filtered_df[(filtered_df["padj"] < alpha)]
+        filtered_df = filtered_df[is_significant_site(filtered_df, alpha, min_freq_diff)]
         # Create BED DataFrame
         bed_df = pd.DataFrame(
             filtered_df, columns=["chrom", "start", "end", "strand", "mod_type"]
@@ -1594,7 +1621,7 @@ def diff_transcript_mod_cond_extract_significant_positions(
     else:
         filtered_df = dmode_obj.diff_transcript_mod_comparisons_dict[f"{cond_level}_VS_{ref_level}"]
         filtered_df = filtered_df[
-            (filtered_df["padj"] < alpha) & (filtered_df["chrom"] == chr)
+            is_significant_site(filtered_df, alpha, min_freq_diff) & (filtered_df["chrom"] == chr)
         ]
         # Create BED DataFrame
         bed_df = pd.DataFrame(
@@ -1700,6 +1727,7 @@ def diff_transcript_mod_cond_generate_volcano_plot_single_chr(
     alpha: float,
     modtype: str = None,
     annotation_df: Optional[pd.DataFrame] = None,
+    min_freq_diff: float = DEFAULT_MIN_FREQ_DIFF,
 ):
     """
     Generate a single volcano plot for one chromosome or all transcripts combined.
@@ -1720,6 +1748,9 @@ def diff_transcript_mod_cond_generate_volcano_plot_single_chr(
         - 'positions': genomic position identifiers
     alpha : float
         Significance threshold for adjusted p-values (e.g., 0.05).
+    min_freq_diff : float, default 10
+        Minimum absolute modification frequency difference (percentage points) for a
+        site to count as significant; drawn as the vertical threshold lines.
     annotation_df : pandas.DataFrame, optional
         Optional annotation table containing `positions` plus identifier columns
         such as `transcript_name`, `transcript_id`, or `gene_name` for
@@ -1734,12 +1765,12 @@ def diff_transcript_mod_cond_generate_volcano_plot_single_chr(
     -----
     - Creates a single figure with scientific styling
     - Color coding:
-        - Gray (#BDBDBD): not significant or effect size < 4%
+        - Gray (#BDBDBD): not significant or |difference| < min_freq_diff
         - Blue (#4575B4): significant decrease
         - Red (#D73027): significant increase
     - Reference lines:
         - Horizontal at -log10(alpha) for significance threshold
-        - Vertical at ±4% modification difference
+        - Vertical at ±min_freq_diff modification difference
     - X-axis range: -100% to +100%
     - Clean, publication-quality appearance
         - Top 10 most significant positions are annotated with transcript names (fallback to IDs) when available
@@ -1819,8 +1850,9 @@ def diff_transcript_mod_cond_generate_volcano_plot_single_chr(
         return fallback_label
     
     # Create masks
-    blue_mask = (final_analysis_df['mod_freq_diff'] <= -4) & (final_analysis_df['padj'] < alpha)
-    red_mask = (final_analysis_df['mod_freq_diff'] >= 4) & (final_analysis_df['padj'] < alpha)
+    significant = is_significant_site(final_analysis_df, alpha, min_freq_diff)
+    blue_mask = significant & (final_analysis_df['mod_freq_diff'] < 0)
+    red_mask = significant & (final_analysis_df['mod_freq_diff'] > 0)
     gray_mask = ~(blue_mask | red_mask)
 
     # Define colors matching scientific palette
@@ -1876,8 +1908,8 @@ def diff_transcript_mod_cond_generate_volcano_plot_single_chr(
     
     # Threshold lines
     ax.axhline(y=-np.log10(alpha), color='black', linestyle='--', linewidth=1.0, alpha=0.5)
-    ax.axvline(x=4, color='black', linestyle='--', linewidth=1.0, alpha=0.5)
-    ax.axvline(x=-4, color='black', linestyle='--', linewidth=1.0, alpha=0.5)
+    ax.axvline(x=min_freq_diff, color='black', linestyle='--', linewidth=1.0, alpha=0.5)
+    ax.axvline(x=-min_freq_diff, color='black', linestyle='--', linewidth=1.0, alpha=0.5)
     
     ax.set_xlim(-100, 100)
     ax.set_facecolor('white')

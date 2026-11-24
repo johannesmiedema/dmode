@@ -10,7 +10,9 @@ from scipy.stats import f, chi2, rankdata
 from tqdm import tqdm
 import os
 import argparse
-from dmode.differential_modification_analysis import (diff_gene_mod_cond_extract_significant_positions,
+from dmode.differential_modification_analysis import (DEFAULT_MIN_FREQ_DIFF,
+                                                    is_significant_site,
+                                                    diff_gene_mod_cond_extract_significant_positions,
                                                     diff_gene_mod_cond_extract_significant_genes,
                                                     diff_gene_mod_cond_generate_volcano_plots,
                                                     diff_gene_mod_cond_generate_volcano_plot_single_chr,
@@ -65,6 +67,8 @@ from dmode.dmode import DmodE
 
 __all__ = [
     # differential_modification_analysis
+    'DEFAULT_MIN_FREQ_DIFF',
+    'is_significant_site',
     'diff_gene_mod_cond_extract_significant_positions',
     'diff_gene_mod_cond_extract_significant_genes',
     'diff_gene_mod_cond_generate_volcano_plots',

@@ -3,6 +3,7 @@ import os
 import numpy as np
 import sys
 import pandas as pd
+from dmode.differential_modification_analysis import DEFAULT_MIN_FREQ_DIFF
 from dmode import (
     log,
     exp,
@@ -387,12 +388,14 @@ def differential_gene_modification_condition_comparison(args):
                     "",
                     DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     annotation_df=comparison_annotations.get(comparison),
                 )
                 fig2 = diff_gene_mod_cond_generate_volcano_plots(
                     DmodE_object.diff_gene_mod_chr_names,
                     DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     annotation_df=comparison_annotations.get(comparison),
                 )
 
@@ -416,6 +419,7 @@ def differential_gene_modification_condition_comparison(args):
                     args.chrom,
                     DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     annotation_df=comparison_annotations.get(comparison),
                 )
                 if args.output_folder != "":
@@ -437,6 +441,7 @@ def differential_gene_modification_condition_comparison(args):
                     "",
                     DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     modtype=mod_code,
                     annotation_df=comparison_annotations.get(comparison),
                 )
@@ -444,6 +449,7 @@ def differential_gene_modification_condition_comparison(args):
                     DmodE_object.diff_gene_mod_chr_names,
                     DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     modtype=mod_code,
                     annotation_df=comparison_annotations.get(comparison),
                 )
@@ -468,6 +474,7 @@ def differential_gene_modification_condition_comparison(args):
                     args.chrom,
                     DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     modtype=mod_code,
                     annotation_df=comparison_annotations.get(comparison),
                 )
@@ -490,6 +497,7 @@ def differential_gene_modification_condition_comparison(args):
                 ref_level=reference_level,
                 cond_level=cond_level,
                 alpha=args.alpha,
+                min_freq_diff=args.min_freq_diff,
                 chr="",
                 output_folder=args.output_folder,
             )
@@ -499,6 +507,7 @@ def differential_gene_modification_condition_comparison(args):
                 ref_level=reference_level,
                 cond_level=cond_level,
                 alpha=args.alpha,
+                min_freq_diff=args.min_freq_diff,
                 chr=args.chrom,
                 output_folder=args.output_folder,
             )
@@ -716,6 +725,7 @@ def differential_transcript_modification_condition_comparison(args):
                     "",
                     DmodE_object.diff_transcript_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     annotation_df=comparison_annotations.get(comparison),
                 )
                 if args.output_folder != "":
@@ -732,6 +742,7 @@ def differential_transcript_modification_condition_comparison(args):
                     args.chrom,
                     DmodE_object.diff_transcript_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     annotation_df=comparison_annotations.get(comparison),
                 )
                 if args.output_folder != "":
@@ -753,6 +764,7 @@ def differential_transcript_modification_condition_comparison(args):
                     "",
                     DmodE_object.diff_transcript_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     modtype=mod_code,
                     annotation_df=comparison_annotations.get(comparison),
                 )
@@ -771,6 +783,7 @@ def differential_transcript_modification_condition_comparison(args):
                     args.chrom,
                     DmodE_object.diff_transcript_mod_comparisons_dict[comparison],
                     alpha=args.alpha,
+                    min_freq_diff=args.min_freq_diff,
                     modtype=mod_code,
                     annotation_df=comparison_annotations.get(comparison),
                 )
@@ -794,6 +807,7 @@ def differential_transcript_modification_condition_comparison(args):
                 ref_level=reference_level,
                 cond_level=cond_level,
                 alpha=args.alpha,
+                min_freq_diff=args.min_freq_diff,
                 chr="",
                 output_folder=args.output_folder,
             )
@@ -803,6 +817,7 @@ def differential_transcript_modification_condition_comparison(args):
                 ref_level=reference_level,
                 cond_level=cond_level,
                 alpha=args.alpha,
+                min_freq_diff=args.min_freq_diff,
                 chr=args.chrom,
                 output_folder=args.output_folder,
             )
@@ -1933,12 +1948,14 @@ def gene_expression_and_modification_analysis(args):
                 "",
                 DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                 alpha=args.alpha_modification,
+                min_freq_diff=args.min_freq_diff,
                 annotation_df=comparison_annotations.get(comparison),
             )
             fig2 = diff_gene_mod_cond_generate_volcano_plots(
                 DmodE_object.diff_gene_mod_chr_names,
                 DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                 alpha=args.alpha_modification,
+                min_freq_diff=args.min_freq_diff,
                 annotation_df=comparison_annotations.get(comparison),
             )
 
@@ -1962,6 +1979,7 @@ def gene_expression_and_modification_analysis(args):
                 args.chrom,
                 DmodE_object.diff_gene_mod_comparisons_dict[comparison],
                 alpha=args.alpha_modification,
+                min_freq_diff=args.min_freq_diff,
                 annotation_df=comparison_annotations.get(comparison),
             )
             if args.output_folder != "":
@@ -1984,6 +2002,7 @@ def gene_expression_and_modification_analysis(args):
                 ref_level=reference_level,
                 cond_level=cond_level,
                 alpha=args.alpha_modification,
+                min_freq_diff=args.min_freq_diff,
                 chr="",
                 output_folder=args.output_folder,
             )
@@ -1993,6 +2012,7 @@ def gene_expression_and_modification_analysis(args):
                 ref_level=reference_level,
                 cond_level=cond_level,
                 alpha=args.alpha_modification,
+                min_freq_diff=args.min_freq_diff,
                 chr=args.chrom,
                 output_folder=args.output_folder,
             )
@@ -2041,16 +2061,16 @@ def gene_expression_and_modification_analysis(args):
         comparison_data = {'modification': mod_df, 'expression': exp_df, 'annotation': annotation_df}
         if mod_df is not None and exp_df is not None:
             logger.info(f"Eruption plot")
-            gene_expression_vs_modification_differcence_scatterplot(comparison_data, args.output_folder, operational_level="genome")
+            gene_expression_vs_modification_differcence_scatterplot(comparison_data, args.output_folder, operational_level="genome", min_freq_diff=args.min_freq_diff, alpha_modification=args.alpha_modification, alpha_expression=args.alpha_expression)
             try:
                 logger.info("Eruption plot with expression/modification correlations")
-                expression_modification_correlation_scatterplot(comparison_data, args.output_folder, operational_level="genome")
+                expression_modification_correlation_scatterplot(comparison_data, args.output_folder, operational_level="genome", min_freq_diff=args.min_freq_diff, alpha_modification=args.alpha_modification, alpha_expression=args.alpha_expression)
             except ValueError:
                 logger.error("Regression scatterplot could not be calculated from the data.")
                 pass
             try:
                 logger.info("Top 50 genes with most number of dignificant differential modification sites")
-                plot_top50_genes_with_most_number_of_significant_modifications(comparison_data, args.output_folder, operational_level="genome")
+                plot_top50_genes_with_most_number_of_significant_modifications(comparison_data, args.output_folder, operational_level="genome", min_freq_diff=args.min_freq_diff, alpha_modification=args.alpha_modification, alpha_expression=args.alpha_expression)
             except ValueError:
                 logger.error("Top 50 genes plot could not be calculated from the data.")
     # Generate HTML report
@@ -2348,6 +2368,7 @@ def transcript_expression_and_modification_analysis(args):
                 "",
                 DmodE_object.diff_transcript_mod_comparisons_dict[comparison_key],
                 alpha=args.alpha_modification,
+                min_freq_diff=args.min_freq_diff,
                 annotation_df=comparison_annotations.get(comparison_key),
             )
             if args.output_folder != "":
@@ -2369,6 +2390,7 @@ def transcript_expression_and_modification_analysis(args):
                 ref_level=reference_level,
                 cond_level=cond_level,
                 alpha=args.alpha_modification,
+                min_freq_diff=args.min_freq_diff,
                 chr="",
                 output_folder=args.output_folder,
             )
@@ -2378,6 +2400,7 @@ def transcript_expression_and_modification_analysis(args):
                 ref_level=reference_level,
                 cond_level=cond_level,
                 alpha=args.alpha_modification,
+                min_freq_diff=args.min_freq_diff,
                 chr=args.chrom,
                 output_folder=args.output_folder,
             )
@@ -2426,17 +2449,17 @@ def transcript_expression_and_modification_analysis(args):
         comparison_data = {'modification': mod_df, 'expression': exp_df, 'annotation': annotation_df}
         if mod_df is not None and exp_df is not None:
             logger.info(f"Eruption plot")
-            gene_expression_vs_modification_differcence_scatterplot(comparison_data, args.output_folder, operational_level="transcriptome")
+            gene_expression_vs_modification_differcence_scatterplot(comparison_data, args.output_folder, operational_level="transcriptome", min_freq_diff=args.min_freq_diff, alpha_modification=args.alpha_modification, alpha_expression=args.alpha_expression)
             try:
                 logger.info("Eruption plot with expression/modification correlations")
-                expression_modification_correlation_scatterplot(comparison_data, args.output_folder, operational_level="transcriptome")
+                expression_modification_correlation_scatterplot(comparison_data, args.output_folder, operational_level="transcriptome", min_freq_diff=args.min_freq_diff, alpha_modification=args.alpha_modification, alpha_expression=args.alpha_expression)
             except ValueError:
                 logger.error("Regression scatterplot could not be calculated from the data.")
                 pass
             try:
 
                 logger.info("Top 50 transcripts with most number of dignificant differential modification sites")
-                plot_top50_genes_with_most_number_of_significant_modifications(comparison_data, args.output_folder, operational_level="transcriptome")
+                plot_top50_genes_with_most_number_of_significant_modifications(comparison_data, args.output_folder, operational_level="transcriptome", min_freq_diff=args.min_freq_diff, alpha_modification=args.alpha_modification, alpha_expression=args.alpha_expression)
             except ValueError:
                 logger.error("Top 50 transcripts plot could not be calculated from the data.")
                 pass
@@ -2798,6 +2821,11 @@ def main():
         default="SLIM",
     )
     optional_gene_mod.add_argument(
+        "--min_freq_diff","-e",dest="min_freq_diff",type=float,
+        help="Minimum absolute modification frequency difference (percentage points) for a site to count as differentially modified, in addition to the adjusted p-value threshold. Applied to the significant-site tables, volcano plots and expression x modification plots.",
+        default=DEFAULT_MIN_FREQ_DIFF
+    )
+    optional_gene_mod.add_argument(
         "--modification", dest="modification", nargs="+", type=str,
         help=f"Specify modification type(s) to analyze. Options: {list(BASE_MODIFICATION_TYPE_DICT.keys())}. If not provided, all modification types present in the data will be analyzed.",
         default=None
@@ -2888,6 +2916,11 @@ def main():
         "--p_value_correction","-v",dest="pvalue_correction",type=str,
         help="Select a pvalue correction method. (SLIM (Significance Level-based Iterative Method) or bh (Benjamini-Hochberg))",
         default="SLIM",
+    )
+    optional_transcript_mod.add_argument(
+        "--min_freq_diff","-e",dest="min_freq_diff",type=float,
+        help="Minimum absolute modification frequency difference (percentage points) for a site to count as differentially modified, in addition to the adjusted p-value threshold. Applied to the significant-site tables, volcano plots and expression x modification plots.",
+        default=DEFAULT_MIN_FREQ_DIFF
     )
     optional_transcript_mod.add_argument(
         "--modification", dest="modification", nargs="+", type=str,
@@ -3127,6 +3160,11 @@ def main():
         default="SLIM",
     )
     optional_gene_expr_mod.add_argument(
+        "--min_freq_diff","-e",dest="min_freq_diff",type=float,
+        help="Minimum absolute modification frequency difference (percentage points) for a site to count as differentially modified, in addition to the adjusted p-value threshold. Applied to the significant-site tables, volcano plots and expression x modification plots.",
+        default=DEFAULT_MIN_FREQ_DIFF
+    )
+    optional_gene_expr_mod.add_argument(
         "--modification", dest="modification", nargs="+", type=str,
         help=f"Specify modification type(s) to analyze. Options: {list(BASE_MODIFICATION_TYPE_DICT.keys())}. If not provided, all modification types present in the data will be analyzed.",
         default=None
@@ -3227,6 +3265,11 @@ def main():
         "--p_value_correction","-v",dest="pvalue_correction",type=str,
         help="Select a pvalue correction method for modification detection. (SLIM (Significance Level-based Iterative Method) or bh (Benjamini-Hochberg))",
         default="SLIM",
+    )
+    optional_transcript_expr_mod.add_argument(
+        "--min_freq_diff","-e",dest="min_freq_diff",type=float,
+        help="Minimum absolute modification frequency difference (percentage points) for a site to count as differentially modified, in addition to the adjusted p-value threshold. Applied to the significant-site tables, volcano plots and expression x modification plots.",
+        default=DEFAULT_MIN_FREQ_DIFF
     )
     optional_transcript_expr_mod.add_argument(
         "--modification", dest="modification", nargs="+", type=str,
